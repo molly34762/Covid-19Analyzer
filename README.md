@@ -24,4 +24,4 @@ Set up the `covid_census` database by running `user_setup.sql` and `tables_setup
 
 ## Running
 
-You may view the application by running `python3 interface.py`
+You may view the application by running `python3 interface.py`.
