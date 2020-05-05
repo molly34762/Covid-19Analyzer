@@ -28,19 +28,21 @@ FROM
 	County AS t1
 	County AS t2
 WHERE
-	t1.countyName = $name1
-	t2.countyName = $name2
+	t1.countyName = $c_name1
+	t1.stateName = $s_name1
+	t2.countyName = $c_name2
+	t2.stateName = $s_name2
 
 2)
-SELECT t1.countyName, (t2.deaths/t1.confirmed)
+SELECT countyName, stateName, (deaths/confirmed)
 FROM
 	CountyConfirmed AS t1
+	FULL JOIN
 	CountyDeaths AS t2
-WHERE 
-	t1.countyName IN ('$name1', '$name2')
-	t2.countyName IN ('$name1', '$name2')
+	ON  t1.countyName = t2.countyName
+	AND	t1.stateName = t2.stateName
 
 3)
 SELECT totalPop, numHouseholds, medianAge, pctOver65
 FROM CountyData
-WHERE countyName IN ('$name1', '$name2')
+WHERE countyName IN ($name1, $name2)
