@@ -1,0 +1,74 @@
+                                                    [                       Home                             ]
+                                                    [                                                        ]
+                                                    [                       New Query                        ]
+                                                    [                       History                          ]
+                                                    [                       Data Set Info                    ]
+                                                    [                       Exit                             ]
+
+                    
+
+                    
+                    
+            [                       New Query                        ]
+            [                                                        ]
+            [                       Explore                          ]
+            [                       Compare                          ]
+            [                       Investigate                      ]
+            [                       HOME                             ]
+
+            
+            
+            
+            [                       Explore                          ]
+            [                                                        ]
+            [                       Search By                        ]
+            [                                                        ]
+            [                       state                            ]
+            [                       county                           ]
+            [                       date                             ]
+            [                       HOME                             ]
+
+
+
+
+
+NEW Query
+
+
+1) Explore by 
+    
+    a)search by state, county, date
+    Search By
+        state
+        county
+        date
+
+2) Compare
+
+    d)input two counties
+
+3) Investigate 
+
+    b)approximate vulnerable populations
+    c) household densities
+
+
+    
+
+a) Search confirmed infected/deaths in county --
+    By state
+    By county
+    By date
+
+b)Finding approximate vulnerable populations  -- race/age/etc
+    By state
+    By county
+
+
+c)Household densities order by county --
+    With respect to covid cases infections
+
+d)Comparison - two input counties
+    How far apart they are
+    Different stats about each --infected/deaths
+    Some relevent county data
