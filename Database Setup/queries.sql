@@ -1,19 +1,23 @@
 1.
 
 1)
-SELECT confirmed 
-FROM CountyConfirmed 
+SELECT SUM(confirmed)
+FROM CountyConfirmed
 WHERE stateName = $name 
-AND date = SELECT MAX(date) 
-	FROM CountyConfirmed 
-	WHERE stateName = $name;
+AND date = (
+	SELECT MAX(date)
+	FROM CountyConfirmed
+	WHERE stateName = $name
+	);
 2)
 SELECT confirmed
 FROM CountyConfirmed
 WHERE countyName = $name
-AND date = SELECT MAX(date) 
-	FROM CountyConfirmed 
-	WHERE countyName = $name;
+AND date = (
+	SELECT MAX(date)
+	FROM CountyConfirmed
+	WHERE countyName = $name
+	);
 3)
 SELECT confirmed FROM CountyConfirmedERE WHERE date = $date;
 
