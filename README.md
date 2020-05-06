@@ -12,15 +12,18 @@ https://github.com/molly34762/Database-Project
 The directory contains the following files:
 
 - `README.md`: This document
-- `census_data.csv`: The census data we are using for this project
 - `get_data.py`: a python script that obtains data from the two sources and populates the postgres database
 - `user_setup.sql`: a sql file that sets up the database `covid_census` and the user `covid_census` 
 - `tables_setup.sql`: a sql file that creates the table for the database `covid_census`
 - `interface.py`: a python script that will run this application
+- `census_data.csv`: The census data we are using for this project
 
 ## Setup
 
-Set up the `covid_census` database by running `user_setup.sql` and `tables_setup.sql`
+Please download the following packages: [psycopg2] [wget] [tabulate]
+All files for set up are located in the folder `Database-Setup`
+Set up the `covid_census` database by running `user_setup.sql` and `tables_setup.sql`.
+Insert the data from the datasets by running `python3 get_data.py`.
 
 ## Running
 

@@ -343,6 +343,7 @@ if __name__ == '__main__':
 # ON CountyData.countyName = County.countyName AND CountyData.StateName = County.StateName
 # WHERE CountyData.countyName = 'Albany' AND CountyData.stateName = 'New York';
 
+
 # SELECT CountyData.totalPop, CountyData.numHouseholds, CountyData.pctMale,  
 # CountyData.medianAge, CountyData.pctUnder18, CountyData.pctOver65, 
 # CountyData.pctWhite, CountyData.pctBlackAA , CountyData.pctIndianAlaskanNative , CountyData.pctAsian,
