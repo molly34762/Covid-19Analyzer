@@ -96,7 +96,7 @@ def MakeNewQuery():
 #######################################################################
                                 ## Explore ##
 def Explore():
-
+    
     #ConfirmedCasesByDate()
     #ConfirmedCasesByCounty()
     #ConfirmedCasesByState()
@@ -121,10 +121,12 @@ def Explore():
                 ConfirmedCasesByCounty()
                 break
             elif selection == 3:
-                
-                ConfirmedCasesByDate()
+                ConfirmedCasesByDateAndCounty()
                 break
             elif selection == 4:
+                ConfirmedCasesByDateAndState()
+                break
+            elif selection == 5:
                 mainMenu()
                 break
             else:
