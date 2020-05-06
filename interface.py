@@ -16,7 +16,7 @@ def clear():
 
 homeMenu = ['HOME', '--------','1. NEW QUERY', '2. HISTORY', '3. DATA SET INFO','4. Exit']
 queryMenu = ['New Query', '--------', '  ', 'INSTRUCTIONS', '  ', '1. EXPLORE', '2. COMPARE', '3. INVESTIGATE', ' ','4. HOME']
-exploreMenu = ['EXPLORE', '--------', '  ', 'INSTRUCTIONS', '  ', '1. STATE', '2. COUNTY', '3. DATE', ' ', '4. HOME']
+exploreMenu = ['EXPLORE', '--------', '  ', 'INSTRUCTIONS', '  ', '1. STATE', '2. COUNTY', '3. DATE BY COUNTY', '3. DATE BY STATE', ' ', '5. HOME']
 compareMenu = ['COMPARE', '--------', '  ', 'INSTRUCTIONS', '  ', '1. COMPARISON BETWEEN TWO COUNTIES', '2. COMPARISON BETWEEN TWO STATES', ' ', '3. HOME']
 investigateMenu = ['INVESTIGATE', '--------', '  ', 'INSTRUCTIONS', '  ', '1. APPROXIMATE VULNERABLE POPULATIONS', '2. CALCULATE HOUSEHOLD DENSITIES', ' ', '3. HOME']
 
@@ -138,27 +138,39 @@ def Explore():
         
 def ConfirmedCasesByState():
     state = input("Enter state: ")
-    queryString = "SELECT SUM(confirmed) FROM CountyConfirmed WHERE stateName LIKE '" + state + "';"
+    queryString = "SELECT SUM(confirmed) FROM CountyConfirmed WHERE stateName = '" + state + "' AND date = (SELECT MAX(date) FROM CountyConfirmed);"
     cursor.execute(queryString)
     records = cursor.fetchall()
     for row in records:
         print("There are " + str(row[0]) + " confirmed cases in " + state)
 
 def ConfirmedCasesByCounty():
+    state = input("Enter state: ")
     county = input("Enter county: ")
-    queryString = "SELECT SUM(confirmed) FROM CountyConfirmed WHERE countyName LIKE '" + county + "';"
+    queryString = "SELECT SUM(confirmed) FROM CountyConfirmed WHERE stateName = '"+ state + "' AND countyName = '" + county + "' AND date = (SELECT MAX(date) FROM CountyConfirmed);"
     cursor.execute(queryString)
     records = cursor.fetchall()
     for row in records:
         print("There are " + str(row[0]) + " confirmed cases in " + county)
 
-def ConfirmedCasesByDate():
-    date = input("Enter date: ")
-    queryString = "SELECT SUM(confirmed) FROM CountyConfirmed WHERE countyName LIKE '" + date + "';"
+def ConfirmedCasesByDateAndCounty():
+    state = input("Enter state: ")
+    county = input("Enter county: ")
+    date = input("Enter date (YYYY-MM-DD): ")
+    queryString = "SELECT SUM(confirmed) FROM CountyConfirmed WHERE stateName = '"+ state + "' AND countyName = '" + county + "' AND date = '" + date + "';"
     cursor.execute(queryString)
     records = cursor.fetchall()
     for row in records:
-        print("There are " + str(row[0]) + " confirmed cases in " + date)
+        print("There are " + str(row[0]) + " confirmed cases in " + county + " on " + date)
+
+def ConfirmedCasesByDateAndState():
+    state = input("Enter state: ")
+    date = input("Enter date (YYYY-MM-DD): ")
+    queryString = "SELECT SUM(confirmed) FROM CountyConfirmed WHERE stateName = '"+ state + "' AND date = '" + date + "';"
+    cursor.execute(queryString)
+    records = cursor.fetchall()
+    for row in records:
+        print("There are " + str(row[0]) + " confirmed cases in " + state + " on " + date)
 
 #######################################################################
                                 ## Compare ##
@@ -331,6 +343,7 @@ if __name__ == '__main__':
     #SELECT SUM(confirmed) FROM CountyConfirmed WHERE stateName = 'New York' AND countyName = 'Albany';
     #SELECT SUM(confirmed) FROM CountyConfirmed WHERE stateName = 'New York' AND countyName = 'Albany' AND date = (SELECT MAX(date) FROM CountyConfirmed);
 
+
 # SELECT SUM(confirmed) FROM CountyConfirmed WHERE stateName = 'New York' AND countyName = 'Albany';
 # SELECT SUM(confirmed) FROM CountyConfirmed WHERE stateName = 'California' AND countyName = 'Riverside';
 # SELECT SUM(deaths) FROM CountyDeaths WHERE stateName = 'New York' AND countyName = 'Albany';
@@ -342,7 +355,6 @@ if __name__ == '__main__':
 # FROM CountyData JOIN County 
 # ON CountyData.countyName = County.countyName AND CountyData.StateName = County.StateName
 # WHERE CountyData.countyName = 'Albany' AND CountyData.stateName = 'New York';
-
 
 # SELECT CountyData.totalPop, CountyData.numHouseholds, CountyData.pctMale,  
 # CountyData.medianAge, CountyData.pctUnder18, CountyData.pctOver65, 
