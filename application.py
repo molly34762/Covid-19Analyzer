@@ -16,26 +16,26 @@ def clear():
 #Repetitive strings used
 newQueryMsg = 'Would you like to perform another query?'
 emptySpace = ' '
-history = []
+history = ['HISTORY', '---------', emptySpace]
 tick = '\u2588'
 smallTick = '\u258C'
 
 #Menu items 
-homeMenu = ['HOME', '--------', emptySpace, '1. NEW QUERY', '2. HISTORY', '3. DATA SET INFO', emptySpace, '4. Exit']
-queryMenu = ['New Query', '--------', emptySpace, 'INSTRUCTIONS', emptySpace, '1. EXPLORE', '2. COMPARE', '3. INVESTIGATE', emptySpace,'4. HOME']
-exploreMenu = ['EXPLORE', '--------', emptySpace, 'INSTRUCTIONS', emptySpace, '1. STATE', '2. COUNTY', '3. STATE OVER TIME', '4. COUNTY OVER TIME','5. STATE BY DATE', '6. COUNTY BY DATE', emptySpace, '7. HOME']
-compareMenu = ['COMPARE', '--------', emptySpace, 'INSTRUCTIONS', emptySpace, '1. DISTANCE BETWEEN TWO COUNTIES', '2. COMPARISON BETWEEN TWO COUNTIES', emptySpace, '3. HOME']
-investigateMenu = ['INVESTIGATE', '--------', emptySpace, 'INSTRUCTIONS', emptySpace, '1. APPROXIMATE VULNERABLE POPULATIONS', '2. CALCULATE HOUSEHOLD DENSITIES', emptySpace, '3. HOME']
+homeMenu = ['HOME', '---------', emptySpace, '1. NEW QUERY', '2. HISTORY', '3. DATA SET INFO', emptySpace, '4. Exit']
+queryMenu = ['NEW QUERY', '---------', emptySpace, 'PERFORM A NEW QUERY - SELECT 1-3', emptySpace, '1. EXPLORE', '2. COMPARE', '3. INVESTIGATE', emptySpace,'4. HOME']
+exploreMenu = ['EXPLORE', '---------', emptySpace, 'EXPLORE CONFIRMED COVID-19 CASES - SELECT 1-6', emptySpace, '1. STATE', '2. COUNTY', '3. STATE OVER TIME', '4. COUNTY OVER TIME','5. STATE BY DATE', '6. COUNTY BY DATE', emptySpace, '7. HOME']
+compareMenu = ['COMPARE', '---------', emptySpace, 'COMPARE TWO COUNTIES - SELECT 1-2', emptySpace, '1. CALCULATE DISTANCE BETWEEN COUNTIES', '2. COMPARE COUNTY ANALYTICS', emptySpace, '3. HOME']
+investigateMenu = ['INVESTIGATE', '---------', emptySpace, 'FURTHER DATA ANALYSIS - SELECT 1-2', emptySpace, '1. APPROXIMATE VULNERABLE POPULATIONS', '2. TOP 10 HOUSEHOLD DENSITIES', emptySpace, '3. HOME']
 
 def displayStartOfBox():
     size = os.get_terminal_size()
     print('\n')
     print('#' * size[0])
-    print('# ' + emptySpace.center(size[0] - 3, ' ') + '#')
+    print('# ' + ' '.center(size[0] - 3) + '#')
 
 def displayEndOfBox():
     size = os.get_terminal_size()
-    print('# ' + emptySpace.center(size[0] - 3, ' ') + '#')
+    print('# ' + ' '.center(size[0] - 3) + '#')
     print('#' * size[0])
     print('\n')
 
@@ -44,8 +44,18 @@ def displayLinesInBox(lines):
     displayStartOfBox()
     size = os.get_terminal_size()
     for line in lines:
-        print('# ' + line.center(size[0] - 3, ' ') + '#')
+        prettyWrapCenterText(line, size[0])
     displayEndOfBox()
+
+def prettyWrapCenterText(text, maxSize):
+    line = ""
+    for word in text.split():
+        if(len(line) + len(word) >= maxSize - 5):
+            print("# " + line.center(maxSize - 5) + "  #")
+            line = word
+        else:
+            line = line + " " + word
+    print("# " + line.center(maxSize - 5) + "  #")
 
 def menuSelect(selections, recursefunct):
     try:
@@ -98,17 +108,13 @@ def ConfirmedCasesByState():
     #Get user input
     state = InputState("Enter state: ")
 
-    #Create and execute the query string
-    queryString = """SELECT SUM(confirmed) FROM CountyConfirmed
-                     WHERE stateName = %s
-                     AND date = (SELECT MAX(date) FROM CountyConfirmed)"""
-    cursor.execute(queryString, (state,))
-    records = cursor.fetchall()
+    #Create and execute the query string\
+    records = db.ConfirmedCasesByStateQuery(state)
 
     #Print output
     lines = []
     for row in records:
-        result = "There are {} confirmed cases in {} state.".format(str(row[0]), state)
+        result = "There are {} confirmed cases in {} State.".format(str(row[0]), state)
         history.append(result)
         lines.append(result)
     lines.append(emptySpace)
@@ -131,14 +137,7 @@ def ConfirmedCasesByCounty():
     county = InputCounty("Choose a county: ", state)
 
     #Create and execute the query string
-    queryString = """SELECT SUM(confirmed)
-                     FROM CountyConfirmed
-                     WHERE stateName = %s
-                     AND countyName = %s
-                     AND date = (SELECT MAX(date) FROM CountyConfirmed);"""
-    cursor.execute(queryString, (state, county))
-    records = cursor.fetchall()
-    size = os.get_terminal_size()
+    records = db.ConfirmedCasesByCountyQuery(state, county)
 
     #Print output
     lines = []
@@ -161,45 +160,22 @@ def ConfirmedCasesByCounty():
 
 #View a histogram of the confirmed cases over time in a state
 def StateOverTime():
-    #Get user input
     state = InputState("Enter state: ")
 
-    #Create and execute a query string
-    queryString = """SELECT CountyConfirmed.date, SUM(CountyConfirmed.confirmed) AS confirmedSum
-                     FROM CountyConfirmed WHERE stateName = %s
-                     AND confirmed != 0 GROUP BY date ORDER BY date"""
-    cursor.execute(queryString, (state,))
-    records = cursor.fetchall()
+    records = db.StateOverTimeQuery(state)
+
     size = os.get_terminal_size()
-
-    #Print output
     displayStartOfBox()
-    print('# ' + emptySpace.center(size[0] - 3, ' ') + '#')
-
-    lgbSize = size[0] * .85
-    barFactor = records[len(records) - 1][1] / lgbSize
-
-    #Format bars in graph
-    day = 0
-    for row in records:
-        if day % 7 == 0:
-            if int(int(row[1])/barFactor) > 0:
-                barRow = "#   <" + str(row[0]) + ">: " + tick * int(int(row[1])/barFactor) + " " + str(row[1])
-                barPaddingAmount = size[0] - len(barRow) - 1
-                print(barRow + barPaddingAmount*' ' + "#")
-                print('# ' + emptySpace.center(size[0] - 3, ' ') + '#')
-            else:
-                barRow = "#   <" + str(row[0]) + ">: " + smallTick + " " + str(row[1])
-                barPaddingAmount = size[0] - len(barRow) - 1
-                print(barRow + barPaddingAmount*' ' + "#")
-                print('# ' + emptySpace.center(size[0] - 3, ' ') + '#')
-        day = day + 1
-            
-    print('# ' + emptySpace.center(size[0] - 3, ' ') + '#')
-    print('# ' + newQueryMsg.center(size[0] - 3, ' ') + '#')
-    print('# ' + '1. Yes'.center(size[0] - 3, ' ') + '#')
-    print('# ' + '2. No'.center(size[0] - 3, ' ') + '#')
+    print('# ' + ("Total confirmed Cases in " + state + " over time.").center(size[0] - 3) + '#')
+    print('# ' + "--------".center(size[0] - 3) + '#')
+    print('# ' + emptySpace.center(size[0] - 3) + '#')
+    drawDateValueHistogram(records)
+    print('# ' + emptySpace.center(size[0] - 3) + '#')
+    print('# ' + newQueryMsg.center(size[0] - 3) + '#')
+    print('# ' + '1. Yes'.center(size[0] - 3) + '#')
+    print('# ' + '2. No'.center(size[0] - 3) + '#')
     displayEndOfBox()
+
     redo = int(input("Enter choice: "))
     if redo == 1:
         Explore()
@@ -210,55 +186,50 @@ def StateOverTime():
 
 #View a histogram of the confirmed cases over time in a state
 def CountyOverTime():
-    #Get user input
     state = InputState("Enter state: ")
     county = InputCounty("Choose a county: ", state)
 
-    #Create and execute a query string
-    queryString = """SELECT CountyConfirmed.date, CountyConfirmed.confirmed 
-                     FROM CountyConfirmed WHERE stateName = %s 
-                     AND countyName = %s 
-                     AND confirmed != 0 GROUP BY date, confirmed ORDER BY date;"""
+    records = db.CountyOverTimeQuery(state, county)
 
-    cursor.execute(queryString, (state, county))
-    records = cursor.fetchall()
     size = os.get_terminal_size()
-
-    #Print output
     displayStartOfBox()
-    print('# ' + emptySpace.center(size[0] - 3, ' ') + '#')
-
-    lgbSize = size[0] * .85
-    barFactor = records[len(records) - 1][1] / lgbSize
-
-    #Format bars in graph
-    day = 0
-    for row in records:
-        if day % 7 == 0:
-            if int(int(row[1])/barFactor) > 0:
-                barRow = "#   <" + str(row[0]) + ">: " + tick * int(int(row[1])/barFactor) + " " + str(row[1])
-                barPaddingAmount = size[0] - len(barRow) - 1
-                print(barRow + barPaddingAmount*' ' + "#")
-                print('# ' + emptySpace.center(size[0] - 3, ' ') + '#')
-            else:
-                barRow = "#   <" + str(row[0]) + ">: " + smallTick + " " + str(row[1])
-                barPaddingAmount = size[0] - len(barRow) - 1
-                print(barRow + barPaddingAmount*' ' + "#")
-                print('# ' + emptySpace.center(size[0] - 3, ' ') + '#')
-        day = day + 1
-            
-    print('# ' + emptySpace.center(size[0] - 3, ' ') + '#')
-    print('# ' + newQueryMsg.center(size[0] - 3, ' ') + '#')
-    print('# ' + '1. Yes'.center(size[0] - 3, ' ') + '#')
-    print('# ' + '2. No'.center(size[0] - 3, ' ') + '#')
+    print('# ' + ("Total confirmed Cases in " + state + ", " + county + " over time.").center(size[0] - 3) + '#')
+    print('# ' + "--------".center(size[0] - 3) + '#')
+    print('# ' + emptySpace.center(size[0] - 3) + '#')
+    drawDateValueHistogram(records)
+    print('# ' + emptySpace.center(size[0] - 3) + '#')
+    print('# ' + newQueryMsg.center(size[0] - 3) + '#')
+    print('# ' + '1. Yes'.center(size[0] - 3) + '#')
+    print('# ' + '2. No'.center(size[0] - 3) + '#')
     displayEndOfBox()
+            
     redo = int(input("Enter choice: "))
     if redo == 1:
         Explore()
     else:
         mainMenu()
         return 
-    
+
+def drawDateValueHistogram(records):
+    size = os.get_terminal_size()
+    lgbSize = size[0] - 27 #enough space for number labels less than 10 billion
+    barFactor = lgbSize / records[len(records) - 1][1]
+
+    #Format bars in graph
+    day = -(len(records) % 7) + 1 #from most recent date in weekly increments
+    for row in records:
+        if day % 7 == 0:
+            if int(int(row[1]) * barFactor) > 0:
+                barRow = "#   <" + str(row[0]) + ">: " + tick * int(int(row[1])*barFactor) + " " + str(row[1])
+                barPaddingAmount = size[0] - len(barRow) - 1
+                print(barRow + barPaddingAmount*' ' + "#")
+                print('# ' + emptySpace.center(size[0] - 3) + '#')
+            else:
+                barRow = "#   <" + str(row[0]) + ">: " + smallTick + " " + str(row[1])
+                barPaddingAmount = size[0] - len(barRow) - 1
+                print(barRow + barPaddingAmount*' ' + "#")
+                print('# ' + emptySpace.center(size[0] - 3) + '#')
+        day = day + 1
 
 #Find the number of confirmed cases by entering a state name, county name, and date
 def ConfirmedCasesByDateAndCounty():
@@ -268,9 +239,7 @@ def ConfirmedCasesByDateAndCounty():
     date = InputDate("Enter date (YYYY-MM-DD): ")
 
     #Create and execute a query string
-    queryString = """SELECT SUM(confirmed) FROM CountyConfirmed WHERE stateName = %s AND countyName = %s AND date = %s"""
-    cursor.execute(queryString, (state, county, date))
-    records = cursor.fetchall()
+    records = db.ConfirmedCasesbyDateAndCount(state, county, date)
     size = os.get_terminal_size()
 
     lines = []
@@ -298,9 +267,7 @@ def ConfirmedCasesByDateAndState():
     date = InputDate("Enter date (YYYY-MM-DD): ")
 
     #Create and execute a query string
-    queryString = """SELECT SUM(confirmed) FROM CountyConfirmed WHERE stateName = %s AND date = %s"""
-    cursor.execute(queryString, (state, date))
-    records = cursor.fetchall()
+    records = db.ConfirmedCasesbyDateandState(state, date)
     size = os.get_terminal_size()
 
     lines = []
@@ -332,19 +299,26 @@ def DistanceBetweenTwoCounties():
     county2 = InputCounty("Enter the second county: ", state2)
 
     #Create and execute a query string
-    queryString = """SELECT 3963 * ACOS((SIN(RADIANS(c1.lat)) * SIN(RADIANS(c2.lat))) + COS(RADIANS(c1.lat)) * COS(RADIANS(c2.lat))*COS(RADIANS(c2.long) - RADIANS(c1.long)))
-                     as miles
-                     FROM County as c1, County as c2
-                     WHERE c1.countyName LIKE %s
-                        AND c1.stateName LIKE %s
-                        AND c2.countyName LIKE %s
-                        AND c2.stateName LIKE %s"""
-    cursor.execute(queryString, (county1, state1, county2, state2))
-    records = cursor.fetchall()
+    records = db.DistanceBetweenCountiesQuery(state1, county1, state2, county2)
 
     #Print output
+    lines = []
     for row in records:
-        print("The distance between " + county1 + " and " + county2 + " is " + str(round(row[0], 2)) + " miles")
+        result = "The distance between " + county1 + " and " + county2 + " is " + str(round(row[0], 2)) + " miles"
+        history.append(result)
+        lines.append(result)
+    lines.append(emptySpace)
+    lines.append(newQueryMsg)
+    lines.append('1. Yes')
+    lines.append('2. No')
+    displayLinesInBox(lines)
+
+    redo = int(input("Enter choice: "))
+    if redo == 1:
+        Compare()
+    else:
+        mainMenu()
+        return 
 
 #View and compare information between two counties
 def compareCounties():
@@ -353,31 +327,14 @@ def compareCounties():
     county1 = InputCounty("Choose the first county: ", state1)
     state2 = InputState("Enter the second state: ")
     county2 = InputCounty("Enter the second county: ", state2)
-    
-    #Create queries to obtain information
-    confirmQuery = """SELECT SUM(confirmed) FROM CountyConfirmed WHERE stateName = %s AND countyName = %s"""
-    deathQuery = """SELECT SUM(deaths) FROM CountyDeaths WHERE stateName = %s AND countyName = %s"""
-    countyQuery = ("""SELECT CountyData.totalPop, CountyData.numHouseholds, CountyData.pctMale,
-                        CountyData.medianAge, CountyData.pctUnder18, CountyData.pctOver65,
-                        CountyData.pctWhite, CountyData.pctBlackAA , CountyData.pctIndianAlaskanNative , CountyData.pctAsian,
-                        CountyData.pctHawaiianPacificIslander, CountyData.pctOtherRace, CountyData.precentHispanicLatino
-                      FROM CountyData JOIN County
-                        ON CountyData.countyName = County.countyName AND CountyData.StateName = County.StateName
-                      WHERE CountyData.countyName = %s AND CountyData.stateName = %s """)
 
     #Execute queries
-    cursor.execute(confirmQuery, (state1, county1))
-    confirmedCase1Query = cursor.fetchall()
-    cursor.execute(confirmQuery, (state1, county1))
-    confirmedCase2Query = cursor.fetchall()
-    cursor.execute(deathQuery, (state1, county1))
-    deathCase1Query = cursor.fetchall()
-    cursor.execute(deathQuery, (state2, county2))
-    deathCase2Query = cursor.fetchall()
-    cursor.execute(countyQuery, (county1, state1))
-    county1InfoQuery = cursor.fetchall()
-    cursor.execute(countyQuery, (county2, state2))
-    county2InfoQuery = cursor.fetchall()
+    confirmedCase1Query = db.ConfirmedCasesByCountyQuery(state1, county1)
+    confirmedCase2Query = db.ConfirmedCasesByCountyQuery(state2, county2)
+    deathCase1Query = db.DeathsByCountyQuery(state1, county1)
+    deathCase2Query = db.DeathsByCountyQuery(state2, county2)
+    county1InfoQuery = db.CountyInfoQuery(state1, county1)
+    county2InfoQuery = db.CountyInfoQuery(state2, county2)
 
     #Print output
     t = PrettyTable(['Statistic', county1 + ", " + state1, county2 + ", " + state2])
@@ -396,8 +353,15 @@ def compareCounties():
     t.add_row(['Percentage pctHawaiianPacificIslander', str(county1InfoQuery[0][10]) + " %",  str(county2InfoQuery[0][10]) + " %"])
     t.add_row(['Percentage pctOtherRace', str(county1InfoQuery[0][11]) + " %", str(county2InfoQuery[0][11]) + " %"])
     t.add_row(['Percentage precentHispanicLatino', str(county1InfoQuery[0][12]) + " %", str(county2InfoQuery[0][12]) + " %"])
+    print(emptySpace)
     print(t)
-    
+    print("\n" + newQueryMsg + "\n1. Yes\n2. No")
+    redo = int(input("\nEnter choice: "))
+    if redo == 1:
+        Compare()
+    else:
+        mainMenu()
+        return 
 
 #Find the amount of people over 65 in a county 
 def TotalCountyPopulationOver65():
@@ -406,44 +370,52 @@ def TotalCountyPopulationOver65():
     county = InputCounty("Choose a county: ", state)
 
     #Create and execute a query string
-    queryString = """SELECT (pctOver65/100) * totalPop FROM CountyData WHERE countyName = %s AND stateName  = %s"""
-    cursor.execute(queryString, (county, state))
-    records = cursor.fetchall()
+    records = db.PopOver65Query(state, county)
 
     #Print output
+    lines = []
     for row in records:
-        print("There are " + str(round(row[0])) + " people who are over 65 years old in " + county)
+        result = "There are " + str(round(row[0])) + " people who are over 65 years old in " + county + ", " + state
+        history.append(result)
+        lines.append(result)
+    lines.append(emptySpace)
+    lines.append(newQueryMsg)
+    lines.append('1. Yes')
+    lines.append('2. No')
+    displayLinesInBox(lines)
+
+    redo = int(input("Enter choice: "))
+    if redo == 1:
+        Investigate()
+    else:
+        mainMenu()
+        return 
+
 
 #Find the top10 housesehold densities and display the county name and state name
 def HouseholdDensity():
     #Create and execute query string
-    queryString = ("""SELECT CountyData.countyName, CountyData.stateName,  
-                        CAST((CAST(totalPop AS float)/numHouseholds) as NUMERIC(5,2)) as householdDensity, 
-                        c.confirmed, d.deaths 
-                      FROM CountyData, 
-	                    (SELECT countyName, stateName, SUM(confirmed) as confirmed FROM CountyConfirmed
-	                        GROUP BY (countyName, stateName)) as c,
-	                    (SELECT countyName, stateName, SUM(deaths) as deaths FROM CountyDeaths
-	                        GROUP BY (countyName, stateName)) as d
-                      WHERE CountyData.countyName = c.countyName
-                        AND CountyData.stateName = c.stateName
-                        AND CountyData.countyName = d.countyName
-                        AND CountyData.stateName = d.stateName
-                      ORDER BY householdDensity DESC
-                      LIMIT 10""" )
-    cursor.execute(queryString)
-    records = cursor.fetchall()
+    records = db.top10HouseholdDensitiesQuery()
     
     #Print output
+    print(emptySpace)
     t = PrettyTable(['County Name', 'State Name', 'Household Density', 'Confirmed Cases', 'Confirmed Deaths'])
     for i in range(10):
         t.add_row([ records[i][0], records[i][1], records[i][2], records[i][3], records[i][4]])
     print(t)
+    print("\n" + newQueryMsg + "\n1. Yes\n2. No")
+    redo = int(input("\nEnter choice: "))
+    if redo == 1:
+        Investigate()
+    else:
+        mainMenu()
+        return 
 
 ################################   OTHER   #######################################
 #View user's history
 def History():
     lines = history.copy()
+    lines.append(emptySpace)
     lines.append('Press anything to return to main menu')
     displayLinesInBox(lines)
     returnKey = input("")
@@ -452,17 +424,28 @@ def History():
         
 #View information about the two datasets
 def DatasetInfo():
-    clear()
-    print("DATA SET INFO")
+    lines = []
+    lines.append("DATASET INFO")
+    lines.append("--------")
+    lines.append("")
+    string1 = """The first dataset is provided by the Johns Hopkins University Center for 
+                Systems Science and Engineering. It provides an account of all the confirmed cases
+                and deaths concerning COVID-19, grouped both within the U.S. by county, and 
+                worldwide by country. The data is updated daily and contains records from as 
+                far back as January 22nd. This application focuses solely on the United States segment.
+                The second dataset is provided by the U.S. census data from data.census.gov. 
+                Tables covering state and county populations are used along with 
+                gender, age, and race distributions within those populations."""
+    lines.append(string1)
+    lines.append("")
+    displayLinesInBox(lines)
     anykey=input("Press anything to return to main menu \n")
     mainMenu()
 
 ################################   USER INPUT HELPERS   #######################################
 #Input state name
 def InputState(input_string):
-    queryString = """SELECT DISTINCT stateName FROM CountyData"""
-    cursor.execute(queryString)
-    records = cursor.fetchall()
+    records = db.allStates()
     while True:
         state = input(input_string)
         if (state,) in records:
@@ -471,17 +454,9 @@ def InputState(input_string):
 
 #display all counties in the selected state, let the user choose one.
 def InputCounty(input_string, state):
-    queryString = """SELECT County.countyName FROM CountyData 
-                     JOIN County 
-                     ON CountyData.countyName = County.countyName AND CountyData.StateName = County.StateName
-                     WHERE County.stateName = %s
-                     AND EXISTS (SELECT * FROM CountyConfirmed as cc WHERE cc.confirmed != 0 AND cc.stateName = County.stateName AND cc.countyName =  County.countyName)
-                     ORDER BY County.countyName"""
-
-    cursor.execute(queryString, (state,))
+    records = db.countiesInState(state)
 
     print("Recorded counties in " + state + ":\n")
-    records = cursor.fetchall()
     any = False
     line = ""
     size = os.get_terminal_size()
@@ -495,6 +470,7 @@ def InputCounty(input_string, state):
                 line = r[0]
             else:
                 line = line + ", " + r[0]
+    print(line)
     if(not any): #no major counties in state.
         return
     print('')
@@ -506,20 +482,12 @@ def InputCounty(input_string, state):
 
 #Input date within range
 def InputDate(input_string):
-    queryString = """SELECT MAX(date) FROM countyConfirmed"""
-    cursor.execute(queryString)
-    maxdate = cursor.fetchone()
+    maxdate = db.maxDate()
+    mindate = db.minDate()
 
-    queryString = """SELECT MIN(date) FROM countyConfirmed"""
-    cursor.execute(queryString)
-    mindate = cursor.fetchone()
-
-    queryString = """SELECT * FROM countyConfirmed WHERE date = %s"""
     while True:
         date = input(input_string)
-        cursor.execute(queryString, (date,))
-        res = cursor.fetchone()
-        if(res is not None):
+        if(db.isValidDate(date)):
             return date
         print("That date is not within the valid date range: " + mindate[0].strftime("%Y-%m-%d") + " - " + maxdate[0].strftime("%Y-%m-%d"))
 

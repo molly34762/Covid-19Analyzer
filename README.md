@@ -1,36 +1,42 @@
 # Database-Project
-
 https://github.com/molly34762/Database-Project
 
-## Datasets used in the application
+# Team
+- Ehren Schindelar
+- Ahsanullah Sehat
+- Meixin Liang
+- Hongyi Huang
 
-1) https://github.com/CSSEGISandData/COVID-19/tree/master/csse_covid_19_data/csse_covid_19_time_series
-2) https://data.census.gov/cedsci/profile?q=United%20States&g=0100000US&tid=ACSDP1Y2018.DP05
+# Purpose
+Analyzing the Covid-19 pandemic with respect to communities in the United States
+
+## Datasets used
+- COVID-19 Data Repository by the Center for Systems Science and Engineering (CSSE) at Johns Hopkins University
+- 2018 United States Census
 
 ## What's in the application
-
 The directory contains the following files:
-
-- `README.md`: This document
-- `get_data.py`: a python script that obtains data from the two sources and populates the postgres database
-- `user_setup.sql`: a sql file that sets up the database `covid_census` and the user `covid_census` 
-- `tables_setup.sql`: a sql file that creates the table for the database `covid_census`
-- `interface.py`: a python script that will run this application
-- `census_data.csv`: The census data we are using for this project
+- `application.py`: Entry point to the application
+- `database.py`: Interface/entrypoint to the database code
+- `datasets.txt`: Text file containing the URLs of the two datasets being used
+- `db-setup.sql`: Creates the database users and grants them privileges
+- `load_data.py`: Loads the data from the datasets into the database
+- `readme.md`: Setup instructions
+- `requirements.txt`: Dependencies and required packages
+- `schema.sql`: Sql file containing the schema that will create the tables
+- `retrieve_data.py`: Download the datasets 
 
 ## Setup
-
-Please download the following packages: [psycopg2] [wget] [PrettyTable]
-You may run `pip3 install psycopg2 wget PrettyTable`
-All files for set up are located in the folder `Database-Setup`
-Set up the `covid_census` database by running `user_setup.sql` and `tables_setup.sql`.
-Insert the data from the datasets by running `python3 get_data.py`.
+1) Please download the following packages in the Ubuntu terminal: [psycopg2] [wget] [PrettyTable]
+2) Set up the database and user by running `db-setup.sql` as superuser
+3) Create the database tables by running `schema.sql` as the newly created user
+4) Download the datasets by running `retrieve_data.py`
+5) Load the data from the datasets into the database by running `load_data.py`
 
 ## Running
+You may view the application by running `python3 application.py`
 
-You may view the application by running `python3 interface.py`.
+## Demonstration Video
+-- 'https://drive.google.com/open?id=1IDB3rk6PiS1TpWHv6YWKuo-NKTx0NFxM'
 
 
-Requirements.txt
-
-[psycopg2] [wget] [PrettyTable]
