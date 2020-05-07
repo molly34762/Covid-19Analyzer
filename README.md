@@ -20,7 +20,8 @@ The directory contains the following files:
 
 ## Setup
 
-Please download the following packages: [psycopg2] [wget] [tabulate]
+Please download the following packages: [psycopg2] [wget] [PrettyTable]
+You may run `pip3 install psycopg2 wget PrettyTable`
 All files for set up are located in the folder `Database-Setup`
 Set up the `covid_census` database by running `user_setup.sql` and `tables_setup.sql`.
 Insert the data from the datasets by running `python3 get_data.py`.
@@ -28,3 +29,8 @@ Insert the data from the datasets by running `python3 get_data.py`.
 ## Running
 
 You may view the application by running `python3 interface.py`.
+
+
+Requirements.txt
+
+[psycopg2] [wget] [PrettyTable]
