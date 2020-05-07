@@ -52,9 +52,6 @@ NEW Query
     b)approximate vulnerable populations
     c) household densities
 
-
-    
-
 a) Search confirmed infected/deaths in county --
     By state
     By county
@@ -72,3 +69,7 @@ d)Comparison - two input counties
     How far apart they are
     Different stats about each --infected/deaths
     Some relevent county data
+
+
+
+    

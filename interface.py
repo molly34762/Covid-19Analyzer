@@ -14,11 +14,14 @@ cursor = psycopg2.connect(connection_string).cursor()
 def clear():
     os.system('clear')
 
-homeMenu = ['HOME', '--------','1. NEW QUERY', '2. HISTORY', '3. DATA SET INFO','4. Exit']
+homeMenu = ['HOME', '--------', '  ', '1. NEW QUERY', '2. HISTORY', '3. DATA SET INFO', ' ', '4. Exit']
 queryMenu = ['New Query', '--------', '  ', 'INSTRUCTIONS', '  ', '1. EXPLORE', '2. COMPARE', '3. INVESTIGATE', ' ','4. HOME']
-exploreMenu = ['EXPLORE', '--------', '  ', 'INSTRUCTIONS', '  ', '1. STATE', '2. COUNTY', '3. DATE BY COUNTY', '3. DATE BY STATE', ' ', '5. HOME']
+exploreMenu = ['EXPLORE', '--------', '  ', 'INSTRUCTIONS', '  ', '1. STATE', '2. COUNTY', '3. STATE BY DATE', '4. COUNTY BY DATE', ' ', '5. HOME']
 compareMenu = ['COMPARE', '--------', '  ', 'INSTRUCTIONS', '  ', '1. COMPARISON BETWEEN TWO COUNTIES', '2. COMPARISON BETWEEN TWO STATES', ' ', '3. HOME']
 investigateMenu = ['INVESTIGATE', '--------', '  ', 'INSTRUCTIONS', '  ', '1. APPROXIMATE VULNERABLE POPULATIONS', '2. CALCULATE HOUSEHOLD DENSITIES', ' ', '3. HOME']
+emptySpace = ' '
+newQueryMsg = 'Would you like to perform another query?'
+history = []
 
 #######################################################################
                                 ## Menus ##
@@ -27,10 +30,10 @@ def mainMenu():
  
     size = os.get_terminal_size()
     # print("Width: %s \nHeight: %s\n" % (size[0], size[1]))
-    print('\n' * 2)
+    print('\n')
     print('#' * size[0])
     for menuItem in homeMenu:
-        print('# ' + menuItem.center(size[0] + 13 -  len(homeMenu[4]), ' ') + '#')
+        print('# ' + menuItem.center(size[0] + 13 -  len(homeMenu[5]), ' ') + '#')
     print('#' * size[0])
     print('\n')
 
@@ -62,10 +65,10 @@ def MakeNewQuery():
     clear()
     
     size = os.get_terminal_size()
-    print('\n' * 2)
+    print('\n')
     print('#' * size[0])
     for menuItem in queryMenu:
-        print('# ' + menuItem.center(size[0] + 13 -  len(homeMenu[4]), ' ') + '#')
+        print('# ' + menuItem.center(size[0] + 13 -  len(homeMenu[5]), ' ') + '#')
     print('#' * size[0])
     print('\n')
 
@@ -103,39 +106,70 @@ def Explore():
     
     clear()
     size = os.get_terminal_size()
-    print('\n' * 2)
+    print('\n')
     print('#' * size[0])
     for menuItem in exploreMenu:
-        print('# ' + menuItem.center(size[0] + 13 -  len(homeMenu[4]), ' ') + '#')
+        print('# ' + menuItem.center(size[0] + 13 -  len(homeMenu[5]), ' ') + '#')
     print('#' * size[0])
     print('\n')
 
     while True:
         try:
-            print("Enter 5 for possible inputs")
             selection=int(input("Enter choice: "))
             if selection == 1:
                 ConfirmedCasesByState()
-                break
+                # print('\n')
+                # print('Would you like to peform another query? \n1. Yes\n2. No')
+                # redo = int(input("Enter choice: "))
+                # if redo == 1:
+                #     if Explore() == -1:
+                #         return -1
+                # else:
+                #     return -1    
+                return
             elif selection == 2:
                 ConfirmedCasesByCounty()
-                break
+                # print('\n')
+                # print('Would you like to peform another query? \n1. Yes\n2. No')
+                # redo = int(input("Enter choice: "))
+                # if redo == 1:
+                #     if Explore() == -1:
+                #         return -1
+                # else:
+                #     return -1
+                return
             elif selection == 3:
-                ConfirmedCasesByDateAndCounty()
-                break
-            elif selection == 4:
                 ConfirmedCasesByDateAndState()
-                break
+                # print('\n')
+                # print('Would you like to peform another query? \n1. Yes\n2. No')
+                # redo = int(input("Enter choice: "))
+                # if redo == 1:
+                #     if Explore() == -1:
+                #         return -1
+                # else:
+                #     return  -1
+                return
+            elif selection == 4:
+                ConfirmedCasesByDateAndCounty()
+                # print('\n')
+                # print('Would you like to peform another query? \n1. Yes\n2. No')
+                # redo = int(input("Enter choice: "))
+                # if redo == 1:
+                #     if Explore() == -1:
+                #         return -1
+                # else:
+                #     return -1
+                return
             elif selection == 5:
                 mainMenu()
-                break
+                return
             else:
                 print("Invalid choice. Enter 1-4")
                 time.sleep(2)
                 MakeNewQuery()
-                break
+                return
         except ValueError:
-            print("Invalid choice. Enter 1-4")
+            print("Invalid Input")
     exit
         
 def ConfirmedCasesByState():
@@ -143,8 +177,29 @@ def ConfirmedCasesByState():
     queryString = "SELECT SUM(confirmed) FROM CountyConfirmed WHERE stateName = '" + state + "' AND date = (SELECT MAX(date) FROM CountyConfirmed);"
     cursor.execute(queryString)
     records = cursor.fetchall()
+
+    size = os.get_terminal_size()
+    print('\n')
+    print('#' * size[0])
+    print('# ' + emptySpace.center(size[0] + 13 -  len(homeMenu[5]), ' ') + '#')
     for row in records:
-        print("There are " + str(row[0]) + " confirmed cases in " + state)
+        result = "There are {} confirmed cases in {} state.".format(str(row[0]), state)
+        history.append(result)
+        print('# ' + result.center(size[0] + 13 -  len(homeMenu[5]), ' ') + '#')
+    print('# ' + emptySpace.center(size[0] + 13 -  len(homeMenu[5]), ' ') + '#')
+    print('# ' + newQueryMsg.center(size[0] + 13 -  len(homeMenu[5]), ' ') + '#')
+    print('# ' + '1. Yes'.center(size[0] + 13 -  len(homeMenu[5]), ' ') + '#')
+    print('# ' + '2. No'.center(size[0] + 13 -  len(homeMenu[5]), ' ') + '#')
+    print('# ' + emptySpace.center(size[0] + 13 -  len(homeMenu[5]), ' ') + '#')
+    print('#' * size[0])
+    print('\n')
+    redo = int(input("Enter choice: "))
+    if redo == 1:
+        Explore()
+    else:
+        mainMenu()
+        return 
+
 
 def ConfirmedCasesByCounty():
     state = input("Enter state: ")
@@ -152,8 +207,29 @@ def ConfirmedCasesByCounty():
     queryString = "SELECT SUM(confirmed) FROM CountyConfirmed WHERE stateName = '"+ state + "' AND countyName = '" + county + "' AND date = (SELECT MAX(date) FROM CountyConfirmed);"
     cursor.execute(queryString)
     records = cursor.fetchall()
+
+    size = os.get_terminal_size()
+    print('\n')
+    print('#' * size[0])
+    print('# ' + emptySpace.center(size[0] + 13 -  len(homeMenu[5]), ' ') + '#')
     for row in records:
-        print("There are " + str(row[0]) + " confirmed cases in " + county)
+        result = "There are {} confirmed cases in {}, {}.".format(str(row[0]), county, state)
+        history.append(result)
+        print('# ' + result.center(size[0] + 13 -  len(homeMenu[5]), ' ') + '#')
+    print('# ' + emptySpace.center(size[0] + 13 -  len(homeMenu[5]), ' ') + '#')
+    print('# ' + newQueryMsg.center(size[0] + 13 -  len(homeMenu[5]), ' ') + '#')
+    print('# ' + '1. Yes'.center(size[0] + 13 -  len(homeMenu[5]), ' ') + '#')
+    print('# ' + '2. No'.center(size[0] + 13 -  len(homeMenu[5]), ' ') + '#')
+    print('# ' + emptySpace.center(size[0] + 13 -  len(homeMenu[5]), ' ') + '#')
+    print('#' * size[0])
+    print('\n')
+    redo = int(input("Enter choice: "))
+    if redo == 1:
+        Explore()
+    else:
+        mainMenu()
+        return 
+
 
 def ConfirmedCasesByDateAndCounty():
     state = input("Enter state: ")
@@ -162,8 +238,30 @@ def ConfirmedCasesByDateAndCounty():
     queryString = "SELECT SUM(confirmed) FROM CountyConfirmed WHERE stateName = '"+ state + "' AND countyName = '" + county + "' AND date = '" + date + "';"
     cursor.execute(queryString)
     records = cursor.fetchall()
+
+    
+    size = os.get_terminal_size()
+    print('\n')
+    print('#' * size[0])
+    print('# ' + emptySpace.center(size[0] + 13 -  len(homeMenu[5]), ' ') + '#')
     for row in records:
-        print("There are " + str(row[0]) + " confirmed cases in " + county + " on " + date)
+        result = "{} confirmed cases in {}, {} on {}.".format(str(row[0]), county, state, date)
+        history.append(result)
+        print('# ' + result.center(size[0] + 13 -  len(homeMenu[5]), ' ') + '#')
+    print('# ' + emptySpace.center(size[0] + 13 -  len(homeMenu[5]), ' ') + '#')
+    print('# ' + newQueryMsg.center(size[0] + 13 -  len(homeMenu[5]), ' ') + '#')
+    print('# ' + '1. Yes'.center(size[0] + 13 -  len(homeMenu[5]), ' ') + '#')
+    print('# ' + '2. No'.center(size[0] + 13 -  len(homeMenu[5]), ' ') + '#')
+    print('# ' + emptySpace.center(size[0] + 13 -  len(homeMenu[5]), ' ') + '#')
+    print('#' * size[0])
+    print('\n')
+    redo = int(input("Enter choice: "))
+    if redo == 1:
+        Explore()
+    else:
+        mainMenu()
+        return 
+
 
 def ConfirmedCasesByDateAndState():
     state = input("Enter state: ")
@@ -171,8 +269,29 @@ def ConfirmedCasesByDateAndState():
     queryString = "SELECT SUM(confirmed) FROM CountyConfirmed WHERE stateName = '"+ state + "' AND date = '" + date + "';"
     cursor.execute(queryString)
     records = cursor.fetchall()
+
+    size = os.get_terminal_size()
+    print('\n')
+    print('#' * size[0])
+    print('# ' + emptySpace.center(size[0] + 13 -  len(homeMenu[5]), ' ') + '#')
     for row in records:
-        print("There are " + str(row[0]) + " confirmed cases in " + state + " on " + date)
+        result = "{} confirmed cases in {} on {}.".format(str(row[0]), state, date)
+        history.append(result)
+        print('# ' + result.center(size[0] + 13 -  len(homeMenu[5]), ' ') + '#')
+    print('# ' + emptySpace.center(size[0] + 13 -  len(homeMenu[5]), ' ') + '#')
+    print('# ' + newQueryMsg.center(size[0] + 13 -  len(homeMenu[5]), ' ') + '#')
+    print('# ' + '1. Yes'.center(size[0] + 13 -  len(homeMenu[5]), ' ') + '#')
+    print('# ' + '2. No'.center(size[0] + 13 -  len(homeMenu[5]), ' ') + '#')
+    print('# ' + emptySpace.center(size[0] + 13 -  len(homeMenu[5]), ' ') + '#')
+    print('#' * size[0])
+    print('\n')
+    redo = int(input("Enter choice: "))
+    if redo == 1:
+        Explore()
+    else:
+        mainMenu()
+        return 
+
 
 #######################################################################
                                 ## Compare ##
@@ -182,7 +301,7 @@ def Compare():
     print('\n' * 2)
     print('#' * size[0])
     for menuItem in compareMenu:
-        print('# ' + menuItem.center(size[0] + 13 -  len(homeMenu[4]), ' ') + '#')
+        print('# ' + menuItem.center(size[0] + 13 -  len(homeMenu[5]), ' ') + '#')
     print('#' * size[0])
     print('\n')
 
@@ -193,6 +312,9 @@ def Compare():
                 DistanceBetweenTwoCounties()
                 break
             elif selection == 2:
+                compareCounties()
+                break
+            elif selection == 3:
                 mainMenu()
                 break
             else:
@@ -224,6 +346,69 @@ def DistanceBetweenTwoCounties():
     for row in records:
         print("The distance between " + county1 + " and " + county2 + " is " + str(round(row[0], 2)) + " miles")
 
+def compareCounties():
+    state1 = input("Enter the first state: ")
+    county1 = input("Enter the first county: ")
+    state2 = input("Enter the second state: ")
+    county2 = input("Enter the second county: ")
+    #info for one county
+    confirmedCase1 = "SELECT SUM(confirmed) FROM CountyConfirmed WHERE stateName = '" + state1 + "' AND countyName = '" + county1 + "';"
+    confirmedCase2 = "SELECT SUM(confirmed) FROM CountyConfirmed WHERE stateName = '" + state2 + "' AND countyName = '" + county2 + "';"
+    deathCase1 = "SELECT SUM(deaths) FROM CountyDeaths WHERE stateName = '" + state1 + "' AND countyName = '" + county1 + "';"
+    deathCase2 = "SELECT SUM(deaths) FROM CountyDeaths WHERE stateName = '" + state2 + "' AND countyName = '" + county2 + "';"
+    
+    county1Info = ("SELECT CountyData.totalPop, CountyData.numHouseholds, CountyData.pctMale, "
+    "CountyData.medianAge, CountyData.pctUnder18, CountyData.pctOver65, "
+    "CountyData.pctWhite, CountyData.pctBlackAA , CountyData.pctIndianAlaskanNative , CountyData.pctAsian, "
+    "CountyData.pctHawaiianPacificIslander, CountyData.pctOtherRace, CountyData.precentHispanicLatino "
+    "FROM CountyData JOIN County "
+    "ON CountyData.countyName = County.countyName AND CountyData.StateName = County.StateName "
+    "WHERE CountyData.countyName = '" + county1 + "' AND CountyData.stateName = '" + state1 + "'; ")
+
+    county2Info = ("SELECT CountyData.totalPop, CountyData.numHouseholds, CountyData.pctMale, "
+    "CountyData.medianAge, CountyData.pctUnder18, CountyData.pctOver65, "
+    "CountyData.pctWhite, CountyData.pctBlackAA , CountyData.pctIndianAlaskanNative , CountyData.pctAsian, "
+    "CountyData.pctHawaiianPacificIslander, CountyData.pctOtherRace, CountyData.precentHispanicLatino "
+    "FROM CountyData JOIN County "
+    "ON CountyData.countyName = County.countyName AND CountyData.StateName = County.StateName "
+    "WHERE CountyData.countyName = '" + county2 + "' AND CountyData.stateName = '" + state2 + "'; ")
+
+    cursor.execute(confirmedCase1)
+    confirmedCase1Query = cursor.fetchall()
+    cursor.execute(confirmedCase2)
+    confirmedCase2Query = cursor.fetchall()
+    cursor.execute(deathCase1)
+    deathCase1Query = cursor.fetchall()
+    cursor.execute(deathCase2)
+    deathCase2Query = cursor.fetchall()
+
+    cursor.execute(county1Info)
+    county1InfoQuery = cursor.fetchall()
+    cursor.execute(county2Info)
+    county2InfoQuery = cursor.fetchall()
+
+    print("Confirmed Cases")
+    print(confirmedCase1Query[0][0])
+    print(confirmedCase2Query[0][0])
+    print("Confirmed Death Numbers")
+    print(deathCase1Query[0][0])
+    print(deathCase2Query[0][0])
+    print("Total Population")
+
+
+    for i in county1InfoQuery:
+        print(str(i[0]) +" " + str(i[1]))
+
+    #print(county1InfoQuery[0][0])
+    
+    print("Number of Households")
+    print("Population Male")
+    print("Median Age")
+    print("Percentage under 18")
+    print("Percentage over 65")
+    print("Percentage White")
+    print("Percentage Black")
+
 #######################################################################
                                 ## Investigate ##
 def Investigate():    
@@ -232,7 +417,7 @@ def Investigate():
     print('\n' * 2)
     print('#' * size[0])
     for menuItem in investigateMenu:
-        print('# ' + menuItem.center(size[0] + 13 -  len(homeMenu[4]), ' ') + '#')
+        print('# ' + menuItem.center(size[0] + 13 -  len(homeMenu[5]), ' ') + '#')
     print('#' * size[0])
     print('\n')
 
@@ -301,9 +486,28 @@ def HouseholdDensity():
 
 def History():
     clear()
-    print("HISTORY")
-    anykey=input("Press anything to return to main menu \n")
+
+    size = os.get_terminal_size()
+    print('\n')
+    print('#' * size[0])
+    print('# ' + emptySpace.center(size[0] + 13 -  len(homeMenu[5]), ' ') + '#')
+    for element in history:
+        result = element
+        print('# ' + result.center(size[0] + 13 -  len(homeMenu[5]), ' ') + '#')
+    print('# ' + emptySpace.center(size[0] + 13 -  len(homeMenu[5]), ' ') + '#')
+    print('# ' + 'Press anything to return to main menu'.center(size[0] + 13 -  len(homeMenu[5]), ' ') + '#')
+    print('# ' + emptySpace.center(size[0] + 13 -  len(homeMenu[5]), ' ') + '#')
+    print('#' * size[0])
+    print('\n')
+    returnKey = int(input(""))
     mainMenu()
+    return
+        
+    # print("HISTORY")
+    # for element in history:
+    #     print(element)
+    # anykey=input("Press anything to return to main menu \n")
+    # mainMenu()
 
 def DatasetInfo():
     clear()
