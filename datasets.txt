@@ -1,0 +1,2 @@
+1) https://github.com/CSSEGISandData/COVID-19/tree/master/csse_covid_19_data/csse_covid_19_time_series
+2) https://data.census.gov/cedsci/profile?q=United%20States&g=0100000US&tid=ACSDP1Y2018.DP05

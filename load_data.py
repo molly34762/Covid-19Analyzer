@@ -1,21 +1,6 @@
-import wget
 import psycopg2
 import csv
 import sys
-
-url_confirmed = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_confirmed_US.csv"
-url_deaths = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_deaths_US.csv"
-try:
-    f = open("confirmed.csv")
-    f.close()
-except IOError:
-    wget.download(url_confirmed, "confirmed.csv")
-
-try:
-    f = open("deaths.csv")
-    f.close()
-except IOError:
-    wget.download(url_deaths, "deaths.csv")
 
 conn = psycopg2.connect("host=localhost dbname=covid_census user=covid_census password=covid_census")
 
