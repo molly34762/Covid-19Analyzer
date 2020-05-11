@@ -1,12 +1,12 @@
 # Database-Project
 
-# Team
+## Team
 - Ehren Schindelar
 - Ahsanullah Sehat
 - Meixin Liang
 - Hongyi Huang
 
-# Purpose
+## Purpose
 Analyzing the Covid-19 pandemic with respect to communities in the United States
 
 ## Datasets used
